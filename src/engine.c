@@ -9,6 +9,8 @@ struct Engine {
     int delay;
     int done;
     int paused;
+    int focused_x;
+    int focused_y;
     struct Game *game;
 
     SDL_Window *sdl_window;
@@ -34,6 +36,8 @@ struct Engine *engine_new(int width, int height, int delay, struct Game *game) {
     e->delay = delay;
     e->done = 0;
     e->paused = 0;
+    e->focused_x = -1;
+    e->focused_y = -1;
     e->game = game;
 
     e->sdl_window = NULL;
@@ -127,8 +131,8 @@ static int draw_cells(struct Engine *e) {
     int margin_top = cell_height / 8;
     SDL_Rect cell_rect;
 
-    if ((err = SDL_SetRenderDrawColor(e->sdl_renderer, 0, 255, 0, SDL_ALPHA_OPAQUE)) != 0) {
-        fprintf(stderr, "SDL_SetRenderDrawColor failed: %s\n", SDL_GetError());
+    if ((err = SDL_SetRenderDrawBlendMode(e->sdl_renderer, SDL_BLENDMODE_BLEND)) != 0) {
+        fprintf(stderr, "SDL_SetRenderDrawBlendMode failed: %s\n", SDL_GetError());
         return err;
     }
 
@@ -136,10 +140,32 @@ static int draw_cells(struct Engine *e) {
         for (int y = 0, gh = game_height(e->game); y < gh; y++) {
             Cell cell = game_cell_get(e->game, x, y);
             if (cell) {
+                if ((err = SDL_SetRenderDrawColor(e->sdl_renderer, 0, 255, 0, 127)) != 0) {
+                    fprintf(stderr, "SDL_SetRenderDrawColor failed: %s\n", SDL_GetError());
+                    return err;
+                }
+
                 cell_rect.x = x * cell_width + margin_left;
                 cell_rect.y = y * cell_height + margin_top;
                 cell_rect.w = cell_width - 2 * margin_left;
                 cell_rect.h = cell_height - 2 * margin_top;
+
+                if ((err = SDL_RenderFillRect(e->sdl_renderer, &cell_rect)) != 0) {
+                    fprintf(stderr, "SDL_RenderFillRect failed: %s\n", SDL_GetError());
+                    return err;
+                }
+            }
+
+            if (x == e->focused_x && y == e->focused_y) {
+                if ((err = SDL_SetRenderDrawColor(e->sdl_renderer, cell*255, !cell*255, 0, 127)) != 0) {
+                    fprintf(stderr, "SDL_SetRenderDrawColor failed: %s\n", SDL_GetError());
+                    return err;
+                }
+
+                cell_rect.x = x * cell_width;
+                cell_rect.y = y * cell_height;
+                cell_rect.w = cell_width;
+                cell_rect.h = cell_height;
 
                 if ((err = SDL_RenderFillRect(e->sdl_renderer, &cell_rect)) != 0) {
                     fprintf(stderr, "SDL_RenderFillRect failed: %s\n", SDL_GetError());
@@ -174,6 +200,7 @@ static int draw_scene(struct Engine *e) {
 }
 
 static int handle_user_input(struct Engine *e) {
+    int err;
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
@@ -183,6 +210,26 @@ static int handle_user_input(struct Engine *e) {
         if (event.type == SDL_KEYUP) {
             if (event.key.keysym.scancode == 0x2C) {
                 e->paused = !e->paused;
+            }
+        }
+        if (event.type == SDL_MOUSEMOTION) {
+            int x, y;
+            SDL_GetMouseState(&x, &y);
+            e->focused_x = x / calc_cell_width(e);
+            e->focused_y = y / calc_cell_height(e);
+        }
+        if (event.type == SDL_MOUSEBUTTONDOWN) {
+            e->paused = 1;
+        }
+        if (event.type == SDL_MOUSEBUTTONUP) {
+            int x, y;
+            SDL_GetMouseState(&x, &y);
+            e->focused_x = x / calc_cell_width(e);
+            e->focused_y = y / calc_cell_height(e);
+            if (game_cell_get(e->game, e->focused_x, e->focused_y)) {
+                game_cell_kill(e->game, e->focused_x, e->focused_y);
+            } else {
+                game_cell_spawn(e->game, e->focused_x, e->focused_y);
             }
         }
     }
