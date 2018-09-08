@@ -1,3 +1,6 @@
 .vimrc
 *.out
 *.swp
+web/life.js
+web/*.wasm
+

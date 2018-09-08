@@ -9,6 +9,8 @@ void field_destroy(struct Field *f);
 
 struct Field *field_copy(struct Field *other);
 
+int field_adjust_size(struct Field *f);
+
 int field_width(struct Field *f);
 
 int field_height(struct Field *f);

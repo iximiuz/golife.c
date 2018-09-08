@@ -18,7 +18,7 @@ int game_width(struct Game *g);
 
 int game_height(struct Game *g);
 
-void game_step(struct Game *g);
+int game_step(struct Game *g);
 
 Cell game_cell_get(struct Game *g, int x, int y);
 

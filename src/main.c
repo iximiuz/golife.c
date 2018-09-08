@@ -12,29 +12,11 @@ void main_loop(void *engine) {
 #endif
 
 int main(int argc, char* argv[]) {
-    // TODO: resize
-    // TODO: edit via mouse click
-    // TODO: textual hint below the grid
-    // TODO: load presets
-    
     srand(time(NULL));
-
-    // struct Game *game = game_new_random(40, 30);
-    struct Game *game = game_load("000000000000000000000\n"
-                                  "001000000000000000000\n"
-                                  "000100000000000000000\n"
-                                  "011100000000000000000\n"
-                                  "000000000000000000000\n"
-                                  "000000000000000000000\n"
-                                  "000000000000000000000\n"
-                                  "000000000000000000000\n"
-                                  "000000000000000000000\n"
-                                  "000000000000000000000\n"
-                                  "000000000000000000000\n"
-                                  "000000000000000000000\n"
-                                  "000000000000000000000\n"
-                                  "000000000000000000000\n"
-                                  "000000000000000000000");
+    
+    struct Game *game = argc == 1 
+        ? game_new_random(80, 60)
+        : game_load(argv[1]);
     if (!game) {
         return 1;
     }

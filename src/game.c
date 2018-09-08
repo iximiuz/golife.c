@@ -33,6 +33,12 @@ struct Game *game_new_random(int width, int height) {
         }
     }
 
+    if (field_adjust_size(g->field) != 0) {
+        field_destroy(g->field);
+        free(g);
+        return NULL;
+    }
+
     return g;
 }
 
@@ -62,6 +68,12 @@ struct Game *game_load(char *state) {
         }
     }
 
+    if (field_adjust_size(g->field) != 0) {
+        field_destroy(g->field);
+        free(g);
+        return NULL;
+    }
+
     return g;
 }
 
@@ -80,11 +92,8 @@ int game_height(struct Game *g) {
     return field_height(g->field);
 }
 
-void game_step(struct Game *g) {
+int game_step(struct Game *g) {
     struct Field *tmp_field = field_copy(g->field);
-
-    // int top_left, top_right, bottom_left, bottom_right;
-
     for (int x = 0, w = game_width(g); x < w; x++) {
         for (int y = 0, h = game_height(g); y < h; y++) {
             int cell = field_cell_get(tmp_field, x, y);
@@ -100,8 +109,9 @@ void game_step(struct Game *g) {
             }
         }
     }
-
     field_destroy(tmp_field);
+
+    return field_adjust_size(g->field);
 }
 
 Cell game_cell_get(struct Game *g, int x, int y) {

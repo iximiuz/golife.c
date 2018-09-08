@@ -246,7 +246,10 @@ int engine_step(struct Engine *e) {
     if (!e->paused) {
         Uint32 now = SDL_GetTicks();
         if ((now - e->last_step_at) >= e->delay) {
-            game_step(e->game);
+            if ((err = game_step(e->game)) != 0) {
+                fprintf(stderr, "engine::game_step failed: %d\n", err);
+                return err;
+            }
             e->last_step_at = now;
         }
     }
