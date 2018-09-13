@@ -35,6 +35,8 @@ int main(int argc, char* argv[]) {
 #endif
 
     engine_destroy(engine);
+    game_destroy(game);
+
     return 0;
 }
 
