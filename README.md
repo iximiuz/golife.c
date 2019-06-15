@@ -4,7 +4,7 @@ Yet another implementation of Conway's Game of Life. This time in C with SDL2.
 
 Compilation to WebAssembly and asm.js via `emscripten` is also supported. 
 
-Play on <a target="_blank" href="http://micromind.me/golife">micromind.me/golife</a>.
+Play on <a target="_blank" href="https://iximiuz.com/golife">iximiuz.com/golife</a>.
 
 ```
 # install SDL2 first (eg. brew install sdl2)
