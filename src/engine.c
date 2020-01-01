@@ -219,7 +219,11 @@ static int handle_user_input(struct Engine *e) {
             e->focused_y = y / calc_cell_height(e);
         }
         if (event.type == SDL_MOUSEBUTTONDOWN) {
-            e->paused = 1;
+            if (event.button.clicks == 1) {
+                e->paused = 1;
+            } else {
+                e->paused = !e->paused;
+            }
         }
         if (event.type == SDL_MOUSEBUTTONUP) {
             int x, y;
